@@ -60,15 +60,12 @@
         const indicatorBarElement = document.getElementById('indicator-bar');
 
         /**
-         * Fetches Bitcoin price data from the CoinGecko API and updates the ticker.
+         * Fetches Bitcoin price data from the reliable CryptoCompare API.
          */
         async function fetchAndUpdatePrice() {
             try {
-                // The original CoinGecko API URL
-                const targetUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
-                
-                // Using a CORS proxy to prevent network errors in some browser/sandboxed environments
-                const apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+                // CryptoCompare API endpoint for full BTC data in USD. It's generally more reliable.
+                const apiUrl = 'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC&tsyms=USD';
 
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
@@ -76,16 +73,21 @@
                 }
                 const data = await response.json();
                 
-                // Extract price and change from the API response
-                const price = data.bitcoin.usd;
-                const change = data.bitcoin.usd_24h_change;
+                // Check if the response contains the data in the expected format
+                if (data.RAW && data.RAW.BTC && data.RAW.BTC.USD) {
+                    const btcData = data.RAW.BTC.USD;
+                    const price = btcData.PRICE;
+                    const change = btcData.CHANGEPCT24HOUR;
 
-                // Update the DOM with the new data
-                updateTickerUI(price, change);
+                    // Update the DOM with the new data
+                    updateTickerUI(price, change);
+                } else {
+                    throw new Error('Unexpected API response structure.');
+                }
 
             } catch (error) {
                 console.error("Failed to fetch Bitcoin price:", error);
-                // Optionally display an error state in the UI
+                // Display an error state in the UI
                 priceElement.textContent = 'Error';
                 changeElement.textContent = 'Data unavailable';
             }
@@ -105,7 +107,7 @@
             const sign = change >= 0 ? '+' : '';
             changeElement.textContent = `${sign}${formattedChange}% (24h)`;
             
-            // Update indicator bar color based on price change (positive or negative)
+            // Update indicator bar color based on price change
             if (change >= 0) {
                 // Price is up or stable
                 indicatorBarElement.classList.remove('bg-red-500');
@@ -122,7 +124,6 @@
          */
         function updateTime() {
             const now = new Date();
-            // Format: 2:12:30PM FRI 20 JAN 2023
             const options = {
                 hour: 'numeric',
                 minute: '2-digit',
@@ -147,7 +148,7 @@
         setInterval(updateTime, 1000);
 
         // Set an interval to fetch a new price every 60 seconds (60000 milliseconds)
-        // This is a more stable interval to avoid API rate limiting.
+        // This is a stable interval to avoid API rate limiting issues.
         setInterval(fetchAndUpdatePrice, 60000);
     </script>
 </body>
