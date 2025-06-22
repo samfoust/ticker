@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Price Ticker</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Apply the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="bg-black flex items-center justify-center min-h-screen">
+
+    <!-- Ticker Container -->
+    <div id="ticker-container" class="max-w-md w-full mx-auto bg-black rounded-lg shadow-lg overflow-hidden flex transition-shadow duration-300">
+
+        <!-- Symbol Section -->
+        <div class="bg-zinc-800 p-3 sm:p-4 flex items-center justify-center w-1/4">
+            <!-- Mobile-optimized font size for the symbol -->
+            <span class="text-white text-2xl sm:text-3xl md:text-4xl font-bold">BTC</span>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="bg-gray-100 p-3 sm:p-4 flex-grow text-center flex flex-col justify-between min-w-0">
+            <!-- Date and Time -->
+            <div id="datetime" class="text-zinc-500 text-xs md:text-sm font-medium tracking-wide">
+                Loading...
+            </div>
+            <!-- Price -->
+            <!-- Mobile-optimized font size for the price -->
+            <div id="price" class="text-black text-4xl sm:text-5xl md:text-6xl font-black my-1">
+                --
+            </div>
+            <!-- Daily Change -->
+            <!-- Mobile-optimized font size for the change -->
+            <div id="change" class="text-black text-base sm:text-lg md:text-xl font-bold">
+                --.--%
+            </div>
+        </div>
+
+        <!-- Indicator Bar -->
+        <div id="indicator-bar" class="w-4 sm:w-6 bg-gray-400 transition-colors duration-500"></div>
+
+    </div>
+
+    <script>
+        // DOM element references
+        const dateTimeElement = document.getElementById('datetime');
+        const priceElement = document.getElementById('price');
+        const changeElement = document.getElementById('change');
+        const indicatorBarElement = document.getElementById('indicator-bar');
+
+        /**
+         * Fetches Bitcoin price data from the CoinGecko API and updates the ticker.
+         */
+        async function fetchAndUpdatePrice() {
+            try {
+                // CoinGecko API endpoint for Bitcoin price in USD with 24h change
+                const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // Extract price and change from the API response
+                const price = data.bitcoin.usd;
+                const change = data.bitcoin.usd_24h_change;
+
+                // Update the DOM with the new data
+                updateTickerUI(price, change);
+
+            } catch (error) {
+                console.error("Failed to fetch Bitcoin price:", error);
+                // Optionally display an error state in the UI
+                priceElement.textContent = 'Error';
+                changeElement.textContent = 'Data unavailable';
+            }
+        }
+
+        /**
+         * Updates the UI elements with the provided price and change data.
+         * @param {number} price - The current price of Bitcoin.
+         * @param {number} change - The 24-hour percentage change.
+         */
+        function updateTickerUI(price, change) {
+            // Format price to a whole number with comma separators (no cents)
+            priceElement.textContent = `$${Math.round(price).toLocaleString('en-US')}`;
+
+            // Format change to 2 decimal places and add a sign
+            const formattedChange = change.toFixed(2);
+            const sign = change >= 0 ? '+' : '';
+            changeElement.textContent = `${sign}${formattedChange}% (24h)`;
+            
+            // Update indicator bar color based on price change (positive or negative)
+            if (change >= 0) {
+                // Price is up or stable
+                indicatorBarElement.classList.remove('bg-red-500');
+                indicatorBarElement.classList.add('bg-green-500');
+            } else {
+                // Price is down
+                indicatorBarElement.classList.remove('bg-green-500');
+                indicatorBarElement.classList.add('bg-red-500');
+            }
+        }
+
+        /**
+         * Updates the date and time display continuously.
+         */
+        function updateTime() {
+            const now = new Date();
+            // Format: 2:12:30PM FRI 20 JAN 2023
+            const options = {
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour12: true
+            };
+            // Convert to uppercase and remove commas for a cleaner look
+            dateTimeElement.textContent = new Intl.DateTimeFormat('en-US', options).format(now).toUpperCase().replace(/,/g, '');
+        }
+
+        // --- Initial Setup and Intervals ---
+
+        // Immediately update the time and fetch the price on page load
+        updateTime();
+        fetchAndUpdatePrice();
+
+        // Set an interval to update the time every second
+        setInterval(updateTime, 1000);
+
+        // Set an interval to fetch a new price every 60 seconds (60000 milliseconds)
+        setInterval(fetchAndUpdatePrice, 60000);
+    </script>
+</body>
+</html>
