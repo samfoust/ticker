@@ -64,9 +64,12 @@
          */
         async function fetchAndUpdatePrice() {
             try {
-                // CoinGecko API endpoint for Bitcoin price in USD with 24h change
-                const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
+                // The original CoinGecko API URL
+                const targetUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true';
                 
+                // Using a CORS proxy to prevent network errors in some browser/sandboxed environments
+                const apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
                     throw new Error(`API request failed with status ${response.status}`);
