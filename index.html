@@ -27,28 +27,28 @@
     <div id="ticker-container" class="w-full h-screen bg-black flex">
 
         <!-- Symbol Section -->
-        <div class="bg-zinc-800 p-4 flex items-center justify-center w-1/4">
-            <span class="text-white text-4xl font-bold">BTC</span>
+        <div class="bg-zinc-900 p-4 flex items-center justify-center w-1/4">
+            <span class="text-white text-6xl font-bold">BTC</span>
         </div>
 
-        <!-- Main Content Section -->
-        <div class="bg-gray-100 p-4 flex-grow text-center flex flex-col justify-center min-w-0">
+        <!-- Main Content Section - Changed to a "paper" color -->
+        <div class="bg-stone-100 p-4 flex-grow text-center flex flex-col justify-center min-w-0">
             <!-- Date and Time -->
-            <div id="datetime" class="text-zinc-500 text-sm font-medium tracking-wide mb-2">
+            <div id="datetime" class="text-zinc-600 text-lg font-medium tracking-wide mb-4">
                 Loading...
             </div>
             <!-- Price -->
-            <div id="price" class="text-black text-6xl font-black my-1">
+            <div id="price" class="text-black text-8xl font-black my-2">
                 --
             </div>
             <!-- Daily Change -->
-            <div id="change" class="text-black text-xl font-bold mt-2">
+            <div id="change" class="text-black text-3xl font-bold mt-4">
                 --.--%
             </div>
         </div>
 
-        <!-- Indicator Bar -->
-        <div id="indicator-bar" class="w-6 bg-gray-400 transition-colors duration-500"></div>
+        <!-- Indicator Bar - Made thicker -->
+        <div id="indicator-bar" class="w-10 bg-gray-400 transition-colors duration-500"></div>
 
     </div>
 
@@ -64,7 +64,7 @@
          */
         async function fetchAndUpdatePrice() {
             try {
-                // CryptoCompare API endpoint for full BTC data in USD. It's generally more reliable.
+                // CryptoCompare API endpoint for full BTC data in USD.
                 const apiUrl = 'https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC&tsyms=USD';
 
                 const response = await fetch(apiUrl);
