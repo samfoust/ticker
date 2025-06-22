@@ -146,8 +146,9 @@
         // Set an interval to update the time every second
         setInterval(updateTime, 1000);
 
-        // Set an interval to fetch a new price every 10 seconds (10000 milliseconds)
-        setInterval(fetchAndUpdatePrice, 10000);
+        // Set an interval to fetch a new price every 60 seconds (60000 milliseconds)
+        // This is a more stable interval to avoid API rate limiting.
+        setInterval(fetchAndUpdatePrice, 60000);
     </script>
 </body>
 </html>
